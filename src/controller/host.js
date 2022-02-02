@@ -223,3 +223,54 @@ export const removeFtp = async ctx => {
         status: 'ok'
     };
 };
+
+export const enableSsl = async ctx => {
+    if (!ctx.request.body.host) {
+        throw (new PublicError('Host is missing')).withStatus(400);
+    }
+    if (!ctx.params.method) {
+        throw (new PublicError('Method is missing')).withStatus(400);
+    }
+
+    var host;
+    if (ctx.request.body.client) {
+        host = (await Client.get(ctx.request.body.client)).host(ctx.request.body.host);
+    } else {
+        host = await Host.get(ctx.request.body.host);
+    }
+    let hostinfo = await host.info()
+    if (!hostinfo.ssl) {
+        await host.enableSsl(ctx.params.method);
+        ctx.body = {
+            status: 'ok'
+        };
+    } else {
+        ctx.body = {
+            status: 'ssl already enabled'
+        };
+    }
+};
+
+export const disableSsl = async ctx => {
+    if (!ctx.request.body.host) {
+        throw (new PublicError('Host is missing')).withStatus(400);
+    }
+
+    var host;
+    if (ctx.request.body.client) {
+        host = (await Client.get(ctx.request.body.client)).host(ctx.request.body.host);
+    } else {
+        host = await Host.get(ctx.request.body.host);
+    }
+    let hostinfo = await host.info()
+    if (hostinfo.ssl) {
+        await host.disableSsl();
+        ctx.body = {
+            status: 'ok'
+        };
+    } else {
+        ctx.body = {
+            status: 'ssl already disabled'
+        };
+    }
+};

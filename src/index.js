@@ -34,6 +34,8 @@ setup().then(() => {
     router.post('/host/option/remove', handle('host@removeOption'));
     router.post('/host/ftp/create', handle('host@createFtp'));
     router.post('/host/ftp/remove', handle('host@removeFtp'));
+    router.post('/host/ssl/enable/:method', handle('host@enableSsl'));
+    router.post('/host/ssl/disable', handle('host@disableSsl'));
 
     router.get('/ftp/status', handle('ftp@status'));
 
