@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import { handle } from './controller';
-import JsonBody from 'koa-json-body';
+const KoaBody = require('koa-body')({multipart:true})
 import ErrorMiddleware from './middleware/error';
 import TokenMiddleware from './middleware/token';
 import CorsMiddleware from '@koa/cors';
@@ -10,14 +10,9 @@ import setup from 'avanti-core/dist/setup';
 setup().then(() => {
     const app = new Koa();
     const router = new Router();
-
     app.use(CorsMiddleware())
     app.use(ErrorMiddleware());
     app.use(TokenMiddleware());
-    app.use(JsonBody({
-        strict: true
-    }));
-
     router.get('/client/list', handle('client@list'));
     router.post('/client/create', handle('client@create'));
     router.post('/client/remove', handle('client@remove'));
@@ -34,7 +29,7 @@ setup().then(() => {
     router.post('/host/option/remove', handle('host@removeOption'));
     router.post('/host/ftp/create', handle('host@createFtp'));
     router.post('/host/ftp/remove', handle('host@removeFtp'));
-    router.post('/host/ssl/enable/:method', handle('host@enableSsl'));
+    router.post('/host/ssl/enable/:method', KoaBody, handle('host@enableSsl'));
     router.post('/host/ssl/disable', handle('host@disableSsl'));
 
     router.get('/ftp/status', handle('ftp@status'));
