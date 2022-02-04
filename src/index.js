@@ -14,10 +14,10 @@ setup().then(() => {
     app.use(CorsMiddleware())
     app.use(ErrorMiddleware());
     app.use(TokenMiddleware());
-    router.get('/client/list', handle('client@list'));
-    router.post('/client/create', handle('client@create'));
-    router.post('/client/remove', handle('client@remove'));
-    
+    router.get('/client/list', JsonBody({strict: true}), handle('client@list'));
+    router.post('/client/create', JsonBody({strict: true}), handle('client@create'));
+    router.post('/client/remove', JsonBody({strict: true}), handle('client@remove'));
+
     router.get('/host/list', JsonBody({strict: true}), handle('host@list'));
     router.post('/host/info', JsonBody({strict: true}), handle('host@info'));
     router.post('/host/create', JsonBody({strict: true}), handle('host@create'));
