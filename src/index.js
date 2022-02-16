@@ -18,6 +18,7 @@ setup().then(() => {
     router.post('/client/create', JsonBody({strict: true}), handle('client@create'));
     router.post('/client/remove', JsonBody({strict: true}), handle('client@remove'));
 
+    router.get('/host/php/list', JsonBody({strict: true}), handle('php@phpVersions'));
     router.get('/host/list', JsonBody({strict: true}), handle('host@list'));
     router.post('/host/info', JsonBody({strict: true}), handle('host@info'));
     router.post('/host/create', JsonBody({strict: true}), handle('host@create'));
@@ -33,7 +34,7 @@ setup().then(() => {
     router.post('/host/ssl/enable/:method', KoaBody, handle('host@enableSsl'));
     router.post('/host/ssl/disable', JsonBody({strict: true}), handle('host@disableSsl'));
 
-    router.get('/ftp/status', handle('ftp@status'));
+    router.get('/ftp/status', JsonBody({strict: true}), handle('ftp@status'));
 
     app
         .use(router.routes())
