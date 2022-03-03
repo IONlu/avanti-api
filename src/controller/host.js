@@ -1,6 +1,7 @@
 import Client from 'avanti-core/dist/client';
 import Host from 'avanti-core/dist/host';
 import PublicError from '../error/public';
+import fs from 'fs'
 
 export const list = async ctx => {
     ctx.body = await Host.list()
@@ -222,4 +223,80 @@ export const removeFtp = async ctx => {
     ctx.body = {
         status: 'ok'
     };
+};
+
+export const enableSsl = async ctx => {
+    if (!ctx.request.body.host) {
+        throw (new PublicError('Host is missing')).withStatus(400);
+    }
+    if (!ctx.params.method) {
+        throw (new PublicError('Method is missing')).withStatus(400);
+    }
+
+    var host;
+    if (ctx.request.body.client) {
+        host = (await Client.get(ctx.request.body.client)).host(ctx.request.body.host);
+    } else {
+        host = await Host.get(ctx.request.body.host);
+    }
+    let hostinfo = await host.info()
+    if (ctx.request.files && ctx.request.files.file) {
+        var files = ctx.request.files.file;
+        if (!(files instanceof Array)) {
+            files = new Array(files)
+        }
+        let certsPath = hostinfo.path + '/certs'
+        for (let file of files) {
+            if (file) {
+                if (file.type !== 'application/x-x509-ca-cert') {
+                    return ctx.body = JSON.stringify({
+                        status: 'error',
+                        message: 'File must be a Cert'
+                    });
+                }
+                const reader = fs.createReadStream(file.path);
+                if (!fs.existsSync(certsPath)) {
+                    fs.mkdirSync(certsPath);
+                }
+
+                const upStream = fs.createWriteStream(`${certsPath}/${file.name}`);
+                reader.pipe(upStream);
+            }
+        }
+    }
+
+    if (!hostinfo.ssl) {
+        await host.enableSsl(ctx.params.method);
+        ctx.body = {
+            status: 'ok'
+        };
+    } else {
+        ctx.body = {
+            status: 'ssl already enabled'
+        };
+    }
+};
+
+export const disableSsl = async ctx => {
+    if (!ctx.request.body.host) {
+        throw (new PublicError('Host is missing')).withStatus(400);
+    }
+
+    var host;
+    if (ctx.request.body.client) {
+        host = (await Client.get(ctx.request.body.client)).host(ctx.request.body.host);
+    } else {
+        host = await Host.get(ctx.request.body.host);
+    }
+    let hostinfo = await host.info()
+    if (hostinfo.ssl) {
+        await host.disableSsl();
+        ctx.body = {
+            status: 'ok'
+        };
+    } else {
+        ctx.body = {
+            status: 'ssl already disabled'
+        };
+    }
 };
