@@ -36,6 +36,8 @@ setup().then(() => {
 
     router.get('/ftp/status', JsonBody({strict: true}), handle('ftp@status'));
 
+    router.get('/server/info', JsonBody({strict: true}), handle('server@info'));
+
     app
         .use(router.routes())
         .use(router.allowedMethods());
